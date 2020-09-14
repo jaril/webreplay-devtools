@@ -15,7 +15,9 @@ let ExampleRecordings = require("./example-recordings.json");
 let count = 1;
 const patterns = [];
 let stripeIndex, stripeCount, dispatchServer, gInstallDir;
-let shouldRecord = false;
+let shouldRecordExamples = false;
+let shouldRecordAll = false;
+let shouldRecordViewer = false;
 const startTime = Date.now();
 
 function processArgs() {
@@ -36,8 +38,14 @@ Arguments:
       case "--pattern":
         patterns.push(next);
         break;
-      case "--record":
-        shouldRecord = true;
+      case "--record-examples":
+        shouldRecordExamples = true;
+        break;
+      case "--record-viewer":
+        shouldRecordViewer = true;
+        break;
+      case "--record-all":
+        shouldRecordAll = true;
         break;
       default:
         console.log(usage);
@@ -97,13 +105,16 @@ async function runMatchingTests() {
     if (stripeCount && i % stripeCount != stripeIndex) {
       continue;
     }
-
-    await runTest("test/harness.js", test, 240, {
+    const env = {
+      RECORD_REPLAY_RECORD_EXAMPLE: shouldRecordAll || shouldRecordExamples,
+      RECORD_REPLAY_DONT_RECORD_VIEWER: shouldRecordAll ? false : !shouldRecordViewer,
       RECORD_REPLAY_TEST_URL:
-        shouldRecord || !exampleRecordingId
+        shouldRecordExamples || !exampleRecordingId
           ? `http://localhost:7998/${example}`
           : `http://localhost:8080/view?id=${exampleRecordingId}&test=${test}`,
-    });
+    };
+
+    await runTest("test/harness.js", test, 240, env);
   }
 }
 
@@ -128,7 +139,7 @@ function createTestScript({ path }) {
   return generatedScriptPath;
 }
 
-let numFailures = 0;
+let failures = [];
 
 async function runTest(path, local, timeout = 60, env = {}) {
   const testURL = env.RECORD_REPLAY_TEST_URL || "";
@@ -189,7 +200,7 @@ async function runTest(path, local, timeout = 60, env = {}) {
   }
 
   function logFailure(why) {
-    numFailures++;
+    failures.push[`Failed test: ${local} ${why}`];
     console.log(`[${elapsedTime()}] Test failed: ${why}`);
 
     // Log an error which github will recognize.
@@ -239,13 +250,14 @@ async function runTest(path, local, timeout = 60, env = {}) {
     await runMatchingTests();
   }
 
-  if (numFailures) {
-    console.log(`[${elapsedTime()}] Had ${numFailures} test failures.`);
+  if (failures.length) {
+    console.log(`[${elapsedTime()}] Had ${failures.length} test failures.`);
+    failures.forEach(failure => console.log(failure));
   } else {
     console.log(`[${elapsedTime()}] All tests passed.`);
   }
 
-  process.exit(numFailures ? 1 : 0);
+  process.exit(failures.length ? 1 : 0);
 })();
 
 function spawnChecked(...args) {

@@ -10,12 +10,19 @@ dump(`TestHarnessStart\n`);
 const url = env.get("RECORD_REPLAY_TEST_URL");
 
 (async function() {
-  await startRecordingTab(url, "localhost");
-  dump(`TestHarnessRecordingTabStarted\n`);
+  await openUrlInTab(url, "localhost");
 
-  // await waitForMessage("RecordingFinished");
-  // dump(`TestHarnessRecordingFinished\n`);
+  if (env.RECORD_REPLAY_RECORD_EXAMPLE) {
+    await clickRecordingButton;
+    await waitForMessage("RecordingFinished");
+    await clickRecordingButton;
+  }
 
-  await stopRecordingAndLoadDevtools();
-  dump(`TestHarnessFinished\n`);
+  if (!env.RECORD_REPLAY_DONT_RECORD_VIEWER) {
+    await waitForDevtools();
+    await clickRecordingButton();
+  }
+
+  await waitForMessage("TestFinished");
+  finishTest();
 })();

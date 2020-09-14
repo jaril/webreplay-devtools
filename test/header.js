@@ -42,8 +42,7 @@ async function waitForUrlBar() {
   });
 }
 
-// Start recording a url in the current tab.
-async function startRecordingTab(url, waitPath) {
+async function openUrlInTab(url, waitPath) {
   await waitForUrlBar();
 
   while (true) {
@@ -58,31 +57,30 @@ async function startRecordingTab(url, waitPath) {
       break;
     }
   }
+}
+
+async function stopRecording() {
+  while (true) {
+    dump(`TestHarnessWaitForDevtools\n`);
+
+    // This is the server used for hosting the devtools in run.js. This is cheesy...
+    if (await waitForLoad("localhost:8080")) {
+      break;
+    }
+  }
 
   await clickRecordingButton();
 }
 
-// Stop a recording tab and load the devtools, finishing up the test when notified
-// by the content tab.
-async function stopRecordingAndLoadDevtools() {
-  await clickRecordingButton();
+async function waitForDevtools() {
+  while (true) {
+    dump(`TestHarnessWaitForDevtools\n`);
 
-  // Record the devtools session itself.
-  if (!env.get("RECORD_REPLAY_DONT_RECORD_VIEWER")) {
-    while (true) {
-      dump(`TestHarnessWaitForDevtools\n`);
-
-      // This is the server used for hosting the devtools in run.js. This is cheesy...
-      if (await waitForLoad("localhost:8080")) {
-        break;
-      }
+    // This is the server used for hosting the devtools in run.js. This is cheesy...
+    if (await waitForLoad("localhost:8080")) {
+      break;
     }
-
-    await clickRecordingButton();
   }
-
-  await waitForMessage("TestFinished");
-  finishTest();
 }
 
 function loadUrl(url) {
