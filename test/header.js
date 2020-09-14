@@ -59,19 +59,6 @@ async function openUrlInTab(url, waitPath) {
   }
 }
 
-async function stopRecording() {
-  while (true) {
-    dump(`TestHarnessWaitForDevtools\n`);
-
-    // This is the server used for hosting the devtools in run.js. This is cheesy...
-    if (await waitForLoad("localhost:8080")) {
-      break;
-    }
-  }
-
-  await clickRecordingButton();
-}
-
 async function waitForDevtools() {
   while (true) {
     dump(`TestHarnessWaitForDevtools\n`);

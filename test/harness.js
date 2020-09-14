@@ -12,17 +12,20 @@ const url = env.get("RECORD_REPLAY_TEST_URL");
 (async function() {
   await openUrlInTab(url, "localhost");
 
-  if (env.RECORD_REPLAY_RECORD_EXAMPLE) {
-    await clickRecordingButton;
+  if (env.get("RECORD_REPLAY_RECORD_EXAMPLE")) {
+    clickRecordingButton();
+    dump(`TestHarnessExampleRecordingTabStarted\n`);
     await waitForMessage("RecordingFinished");
-    await clickRecordingButton;
+    clickRecordingButton();
+    dump(`TestHarnessExampleRecordingTabFinished\n`);
   }
-
-  if (!env.RECORD_REPLAY_DONT_RECORD_VIEWER) {
+  
+  if (!env.get("RECORD_REPLAY_DONT_RECORD_VIEWER")) {
     await waitForDevtools();
     await clickRecordingButton();
   }
 
   await waitForMessage("TestFinished");
   finishTest();
+  dump(`TestHarnessFinished\n`);
 })();

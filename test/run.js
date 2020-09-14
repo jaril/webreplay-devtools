@@ -102,11 +102,17 @@ async function runMatchingTests() {
   for (let i = 0; i < Manifest.length; i++) {
     const [test, example] = Manifest[i];
     const exampleRecordingId = ExampleRecordings[example];
+    console.log(">>ExampleRecordings", ExampleRecordings);
+    console.log(">>example", example);
+    console.log(">>ExampleRecordings[example]", ExampleRecordings[example]);
     if (stripeCount && i % stripeCount != stripeIndex) {
       continue;
     }
+
+    console.log(">>should record", shouldRecordAll || shouldRecordExamples || !exampleRecordingId);
+
     const env = {
-      RECORD_REPLAY_RECORD_EXAMPLE: shouldRecordAll || shouldRecordExamples,
+      RECORD_REPLAY_RECORD_EXAMPLE: shouldRecordAll || shouldRecordExamples || !exampleRecordingId,
       RECORD_REPLAY_DONT_RECORD_VIEWER: shouldRecordAll ? false : !shouldRecordViewer,
       RECORD_REPLAY_TEST_URL:
         shouldRecordExamples || !exampleRecordingId
@@ -190,7 +196,10 @@ async function runTest(path, local, timeout = 60, env = {}) {
       console.log(`example`, exampleRecordingId, example, url.parse(match[2]));
 
       ExampleRecordings = { ...ExampleRecordings, [example]: exampleRecordingId };
-      fs.writeFileSync("./example-recordings.json", JSON.stringify(ExampleRecordings, null, 2));
+      fs.writeFileSync(
+        "./test/example-recordings.json",
+        JSON.stringify(ExampleRecordings, null, 2)
+      );
     }
 
     if (/TestPassed/.test(data.toString())) {
