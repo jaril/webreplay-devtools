@@ -157,27 +157,28 @@ class Breakpoint extends PureComponent {
         </span>
 
         <div>
-          #{analysisPoints ? analysisPoints.length : 0} hits |
+          Hits: {analysisPoints ? analysisPoints.length : 0} |
           <button
+            className={`warpbutton button-prev${!prev ? " disabled" : ""}`}
             disabled={!prev}
             onClick={() => {
               this.navigateToPrev(prev);
             }}
           >
-            <b>PREVIOUS</b>
+            ►
           </button>{" "}
-          |
           <button
+            className={`warpbutton button-next${!next ? " disabled" : ""}`}
             disabled={!next}
             onClick={() => {
               this.navigateToPrev(next);
             }}
           >
-            Next
+            ►
           </button>
         </div>
         <div className="breakpoint-line-close">
-          <div className="breakpoint-line devtools-monospace">{this.getBreakpointLocation()}</div>
+          {/* <div className="breakpoint-line devtools-monospace">{this.getBreakpointLocation()}</div> */}
           <CloseButton
             handleClick={e => this.removeBreakpoint(e)}
             tooltip={L10N.getStr("breakpoints.removeBreakpointTooltip")}

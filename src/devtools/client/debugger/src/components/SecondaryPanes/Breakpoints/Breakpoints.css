@@ -120,6 +120,7 @@ html .breakpoints-list .breakpoint.paused {
 
 .breakpoint-line-close {
   margin-inline-start: 4px;
+  width: 24px;
 }
 
 .breakpoints-list .breakpoint .breakpoint-line {
@@ -231,3 +232,24 @@ html .breakpoints-list .breakpoint.paused {
   padding-top: 1px;
 }
 
+.warpbutton {
+  cursor: pointer;
+  background: var(--dark-blue);
+  color: white;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+.button-prev {
+  transform: rotate(180deg);
+}
+
+.warpbutton.disabled,
+.warpbutton.disabled:hover {
+  background: #eeeeee;
+}
+
+.warpbutton:not(.disabled):hover {
+  background: #2070ef;
+}
