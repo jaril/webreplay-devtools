@@ -9,6 +9,7 @@ function initialTimelineState(): TimelineState {
     hoverTime: null,
     playback: null,
     highlightedMessage: null,
+    highlightedLocation: null,
     hoveredMessage: null,
     unprocessedRegions: [],
     shouldAnimate: true,
@@ -49,6 +50,7 @@ export const getCurrentTime = (state: UIState) => state.timeline.currentTime;
 export const getHoverTime = (state: UIState) => state.timeline.hoverTime;
 export const getPlayback = (state: UIState) => state.timeline.playback;
 export const getHighlightedMessage = (state: UIState) => state.timeline.highlightedMessage;
+export const getHighlightedLocation = (state: UIState) => state.timeline.highlightedLocation;
 export const getHoveredMessage = (state: UIState) => state.timeline.hoveredMessage;
 export const getUnprocessedRegions = (state: UIState) => state.timeline.unprocessedRegions;
 export const getRecordingDuration = (state: UIState) => state.timeline.recordingDuration;

@@ -1,4 +1,4 @@
-import { PauseDescription, ScreenShot, TimeRange } from "record-replay-protocol";
+import { PauseDescription, ScreenShot, TimeRange, Location } from "record-replay-protocol";
 import { MouseAndClickPosition } from "../../protocol/graphics";
 
 export interface Tooltip {
@@ -27,6 +27,7 @@ export interface TimelineState {
   timelineDimensions: { width: number; left: number; top: number };
   hoverTime: number | null;
   highlightedMessage: string | null;
+  highlightedLocation: Location | null;
   hoveredMessage: number | null;
   unprocessedRegions: TimeRange[];
   shouldAnimate: boolean;
