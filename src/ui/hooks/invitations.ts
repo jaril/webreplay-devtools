@@ -60,6 +60,13 @@ export function useAddInvitation() {
 }
 
 export function useMaybeClaimInvite() {
+  const userId = getUserId();
+
+  // If the user is logged out there's nothing to claim, so bail.
+  if (!userId) {
+    return { loading: false };
+  }
+
   const { invitations, invited, email, loading } = useGetUserInfo();
   const claimInvitation = useClaimInvitation();
 

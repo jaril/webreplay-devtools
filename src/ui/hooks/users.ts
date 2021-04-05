@@ -4,6 +4,7 @@ import { Invitation } from "./invitations";
 
 export function useGetUserInfo() {
   const userId = getUserId();
+
   const { data, loading, error } = useQuery(
     gql`
       query GetUser($userId: uuid!) {
