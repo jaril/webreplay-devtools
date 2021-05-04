@@ -63,14 +63,6 @@
   width: 100%;
 }
 
-.transcript-list .comment-body > :not(:last-child) {
-  padding-bottom: 12px;
-}
-
-.transcript-list .comment-body > :first-child {
-  padding-top: 12px;
-}
-
 .transcript-list .comment-body-header {
   display: grid;
   grid-template-rows: auto min-content;

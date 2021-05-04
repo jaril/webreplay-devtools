@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { selectors } from "ui/reducers";
 import { actions } from "ui/actions";
@@ -7,16 +7,12 @@ import hooks from "ui/hooks";
 import { isTest } from "ui/utils/environment";
 
 import TranscriptFilter from "ui/components/Transcript/TranscriptFilter";
-import {
-  EventTranscriptItem,
-  NonEventTranscriptItem,
-  FloatingTranscriptItem,
-} from "./TranscriptItem";
 import "./Transcript.css";
 import UploadScreen from "../UploadScreen";
 
 import { UIState } from "ui/state";
-import { Event, Comment, FloatingItem } from "ui/state/comments";
+import { Event, Comment, PendingNewComment } from "ui/state/comments";
+import CommentCard from "./CommentCard";
 
 type Entry = Comment | Event;
 
@@ -41,45 +37,20 @@ function createEntries(comments: Comment[], clickEvents: Event[], shouldShowLone
   return [...entries, ...nonNestedComments];
 }
 
-function Transcript({
-  clickEvents,
-  currentTime,
-  playback,
-  recordingId,
-  shouldShowLoneEvents,
-  floatingItem,
-  showFloatingItem,
-  hideFloatingItem,
-}: PropsFromRedux) {
+function Transcript({ recordingId, pendingComment, clearPendingComment }: PropsFromRedux) {
   const { comments } = hooks.useGetComments(recordingId!);
   const { recording, loading } = hooks.useGetRecording(recordingId!);
   const { userId } = hooks.useGetUserId();
   const isAuthor = userId && userId == recording?.userId;
+  const [focusedCommentId, setFocusedCommentId] = useState<null | string>(null);
 
-  const entries: Entry[] = createEntries(comments, clickEvents, false);
-
-  useEffect(
-    function updateFloatingItem() {
-      const isPlaying = playback;
-      const isFloatingPause = !entries.some(entry => entry.time == currentTime);
-
-      if (isFloatingPause && !isPlaying) {
-        showFloatingItem();
-      } else {
-        hideFloatingItem();
-      }
-    },
-    [currentTime, comments]
-  );
+  const setFocused = (id: string | null) => {
+    clearPendingComment();
+    setFocusedCommentId(id);
+  };
 
   if (loading) {
     return null;
-  }
-
-  const displayedEntries: (Entry | FloatingItem)[] = [...entries];
-
-  if (floatingItem) {
-    displayedEntries.push(floatingItem);
   }
 
   // Only show the initialization screen if the replay is not being opened
@@ -88,22 +59,22 @@ function Transcript({
     return <UploadScreen />;
   }
 
+  const displayedComments: (Comment | PendingNewComment)[] = [...comments];
+
+  if (pendingComment?.type == "new_comment") {
+    displayedComments.push(pendingComment.comment);
+  }
+
   return (
     <div className="right-sidebar">
       <div className="right-sidebar-toolbar">
-        <div className="right-sidebar-toolbar-item">Transcript</div>
+        <div className="right-sidebar-toolbar-item">Comments</div>
         <TranscriptFilter />
       </div>
       <div className="transcript-panel">
-        <div className="transcript-list">
-          {sortBy(displayedEntries, ["time", "kind", "createdAt"]).map((entry, i) => {
-            if ("itemType" in entry) {
-              return <FloatingTranscriptItem item={entry} key={i} />;
-            } else if ("content" in entry) {
-              return <NonEventTranscriptItem comment={entry} key={i} />;
-            } else {
-              return <EventTranscriptItem event={entry} key={i} />;
-            }
+        <div className="transcript-list space-y-4">
+          {sortBy(displayedComments, ["time"]).map((entry, i) => {
+            return <CommentCard comment={entry} key={i} />;
           })}
         </div>
       </div>
@@ -113,16 +84,11 @@ function Transcript({
 
 const connector = connect(
   (state: UIState) => ({
-    playback: selectors.getPlayback(state),
-    currentTime: selectors.getCurrentTime(state),
     recordingId: selectors.getRecordingId(state),
-    clickEvents: selectors.getEventsForType(state, "mousedown"),
-    shouldShowLoneEvents: selectors.getShouldShowLoneEvents(state),
-    floatingItem: selectors.getFloatingItem(state),
+    pendingComment: selectors.getPendingComment(state),
   }),
   {
-    showFloatingItem: actions.showFloatingItem,
-    hideFloatingItem: actions.hideFloatingItem,
+    clearPendingComment: actions.clearPendingComment,
   }
 );
 type PropsFromRedux = ConnectedProps<typeof connector>;

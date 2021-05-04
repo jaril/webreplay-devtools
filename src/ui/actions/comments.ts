@@ -213,3 +213,22 @@ export function seekToComment(item: Comment | Reply | Event | FloatingItem): UIT
     }
   };
 }
+
+export function replyToComment(comment: Comment): UIThunkAction {
+  return ({ dispatch }) => {
+    const { time, point, hasFrames, id } = comment;
+    const pendingComment: PendingComment = {
+      type: "new_reply",
+      comment: {
+        content: "",
+        time,
+        point,
+        hasFrames,
+        sourceLocation: null,
+        parentId: id,
+      },
+    };
+
+    dispatch(setPendingComment(pendingComment));
+  };
+}

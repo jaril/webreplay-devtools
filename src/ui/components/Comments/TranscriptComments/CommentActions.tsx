@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import PortalDropdown from "ui/components/shared/PortalDropdown";
-import { Comment } from "ui/state/comments";
+import { Comment, Reply } from "ui/state/comments";
 import { actions } from "ui/actions";
 import hooks from "ui/hooks";
 import "./CommentActions.css";
+import { DotsHorizontalIcon } from "@heroicons/react/solid";
 
 type CommentActionsProps = PropsFromRedux & {
-  comment: Comment;
+  comment: Comment | Reply;
   isRoot: boolean;
 };
 
@@ -48,7 +49,7 @@ function CommentActions({ comment, editItem, isRoot }: CommentActionsProps) {
   return (
     <div className="comment-actions" onClick={e => e.stopPropagation()}>
       <PortalDropdown
-        buttonContent={<div className="dropdown-button">⋮</div>}
+        buttonContent={<DotsHorizontalIcon className="w-5 h-5 opacity-0 group-hover:opacity-100" />}
         setExpanded={setExpanded}
         expanded={expanded}
         buttonStyle=""

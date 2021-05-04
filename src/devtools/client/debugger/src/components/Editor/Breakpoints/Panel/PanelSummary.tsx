@@ -1,7 +1,10 @@
+import { pointEquals } from "protocol/execution-point-utils";
 import React, { Dispatch, SetStateAction } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { actions } from "ui/actions";
+import hooks from "ui/hooks";
 import { selectors } from "ui/reducers";
+import { getRecordingId } from "ui/reducers/app";
 import { UIState } from "ui/state";
 const { getExecutionPoint } = require("devtools/client/debugger/src/reducers/pause");
 
@@ -16,6 +19,7 @@ type PanelSummaryProps = PropsFromRedux & {
 
 function PanelSummary({
   breakpoint,
+  recordingId,
   toggleEditingOn,
   isEditable,
   setInputToFocus,
@@ -24,11 +28,16 @@ function PanelSummary({
   currentTime,
   analysisPoints,
 }: PanelSummaryProps) {
+  const { comments } = hooks.useGetComments(recordingId!);
+
   const conditionValue = breakpoint.options.condition;
   const logValue = breakpoint.options.logValue;
-  const enableCommenting = analysisPoints?.find(
+
+  const pausedOnHit = analysisPoints?.find(
     point => point.point == executionPoint && point.time == currentTime
   );
+  const commentOnPause = comments.find(c => c.point === executionPoint && c.time === currentTime);
+  const enableAddComment = pausedOnHit && comments && !commentOnPause;
 
   const handleClick = (event: React.MouseEvent, input: Input) => {
     if (!isEditable) {
@@ -66,7 +75,7 @@ function PanelSummary({
             log(<span className="expression">{logValue}</span>)
           </button>
         </div>
-        {enableCommenting ? (
+        {enableAddComment ? (
           <button
             type="button"
             onClick={addComment}
@@ -93,6 +102,7 @@ function PanelSummary({
 const connector = connect(
   (state: UIState, { breakpoint }: { breakpoint: any }) => ({
     executionPoint: getExecutionPoint(state),
+    recordingId: getRecordingId(state),
     currentTime: selectors.getCurrentTime(state),
     analysisPoints: selectors.getAnalysisPointsForLocation(
       state,

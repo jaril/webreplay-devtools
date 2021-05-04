@@ -94,7 +94,6 @@ function TranscriptItem({
               {secondaryLabel}
             </div>
           </div>
-          {/* <ReplyButton item={item} /> */}
         </div>
       ) : null}
       {children}
