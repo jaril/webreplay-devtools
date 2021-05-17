@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import classNames from "classnames";
 import { UIState } from "ui/state";
@@ -15,7 +15,7 @@ import useDraftJS from "./CommentEditor/use-draftjs";
 import CommentCardFooter from "./CommentCardFooter";
 const { getExecutionPoint } = require("devtools/client/debugger/src/reducers/pause");
 
-const hoveredStyles = "shadow-xl border-blue-600 hover:border-blue-600";
+const hoveredStyles = "border-blue-600 hover:border-blue-600";
 
 function CommentItem({
   pendingComment,
@@ -71,16 +71,18 @@ function CommentCard({
   comment,
   currentTime,
   executionPoint,
+  selectedComment,
   seekToComment,
   setModal,
   replyToComment,
-  hoveredComment,
   setHoveredComment,
   pendingComment,
+  setSelectedComment,
 }: CommentCardProps) {
   const { isAuthenticated } = useAuth0();
   const load = useDraftJS();
-  const isPaused = comment.time === currentTime && executionPoint === comment.point;
+  const cardNode = useRef<HTMLDivElement>(null);
+  const isSelected = "id" in comment && selectedComment && selectedComment.id === comment.id;
   const isEditing =
     pendingComment &&
     ["edit_comment", "edit_reply"].includes(pendingComment.type) &&
@@ -96,6 +98,11 @@ function CommentCard({
 
     return () => idle && clearTimeout(idle);
   }, []);
+  useEffect(() => {
+    if ("id" in comment && selectedComment && selectedComment.id === comment.id) {
+      cardNode.current!.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+  }, [selectedComment]);
 
   const onReply = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -112,6 +119,7 @@ function CommentCard({
 
   // If the comment for this card doesn't have an ID, it's because it's the corresponding
   // comment for a pending new comment.
+  // remove ispaused here -jvv
   if (!("id" in comment)) {
     return (
       <div
@@ -119,11 +127,7 @@ function CommentCard({
         onMouseEnter={() => setHoveredComment("pendingCommentId")}
         onMouseLeave={() => setHoveredComment(null)}
       >
-        <div
-          className={classNames("bg-white rounded-xl border border-blue-400 shadow-lg", {
-            [hoveredStyles]: hoveredComment == "pendingCommentId" && isPaused,
-          })}
-        >
+        <div className={classNames("bg-white rounded-xl border border-blue-400 shadow-lg")}>
           {comment.sourceLocation ? <CommentSource comment={comment} /> : null}
           <NewCommentEditor comment={comment} type={"new_comment"} />
         </div>
@@ -131,19 +135,27 @@ function CommentCard({
     );
   }
 
+  const onClick = () => {
+    seekToComment(comment);
+    setSelectedComment(comment);
+  };
+
   return (
     <div
       className={`mx-auto w-full group`}
-      onClick={() => seekToComment(comment)}
+      onClick={onClick}
       onMouseEnter={() => setHoveredComment(comment.id)}
       onMouseLeave={() => setHoveredComment(null)}
+      ref={cardNode}
     >
       <div
-        className={classNames("bg-white rounded-xl border border-gray-300 hover:border-blue-400", {
-          "border-blue-400 shadow-lg": isPaused,
-          "cursor-pointer": !isPaused,
-          [hoveredStyles]: hoveredComment == comment.id && isPaused,
-        })}
+        className={classNames(
+          "bg-white rounded-xl border border-gray-300 hover:border-blue-400 transition duration-200 ease-in-out",
+          {
+            "border-blue-400 shadow-lg": isSelected,
+            "cursor-pointer": !isSelected,
+          }
+        )}
       >
         {comment.sourceLocation ? <CommentSource comment={comment} /> : null}
         <CommentItem comment={comment} pendingComment={pendingComment} />
@@ -152,7 +164,9 @@ function CommentCard({
             <CommentItem comment={reply} pendingComment={pendingComment} />
           </div>
         ))}
-        {isPaused && !isEditing ? <CommentCardFooter comment={comment} onReply={onReply} /> : null}
+        {isSelected && !isEditing ? (
+          <CommentCardFooter comment={comment} onReply={onReply} />
+        ) : null}
       </div>
     </div>
   );
@@ -164,6 +178,7 @@ const connector = connect(
     currentTime: selectors.getCurrentTime(state),
     executionPoint: getExecutionPoint(state),
     hoveredComment: selectors.getHoveredComment(state),
+    selectedComment: selectors.getSelectedComment(state),
   }),
   {
     replyToComment: actions.replyToComment,
@@ -171,6 +186,7 @@ const connector = connect(
     seekToComment: actions.seekToComment,
     editItem: actions.editItem,
     setHoveredComment: actions.setHoveredComment,
+    setSelectedComment: actions.setSelectedComment,
   }
 );
 type PropsFromRedux = ConnectedProps<typeof connector>;

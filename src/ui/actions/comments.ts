@@ -9,6 +9,7 @@ import { setSelectedPrimaryPanel } from "./app";
 
 type SetPendingComment = Action<"set_pending_comment"> & { comment: PendingComment | null };
 type SetHoveredComment = Action<"set_hovered_comment"> & { comment: any };
+type SetSelectedComment = Action<"set_selected_comment"> & { comment: any };
 type SetShouldShowLoneEvents = Action<"set_should_show_lone_events"> & { value: boolean };
 type SetFloatingItem = Action<"set_floating_item"> & {
   floatingItem: FloatingItem | null;
@@ -18,7 +19,8 @@ export type CommentsAction =
   | SetPendingComment
   | SetHoveredComment
   | SetShouldShowLoneEvents
-  | SetFloatingItem;
+  | SetFloatingItem
+  | SetSelectedComment;
 
 export function setPendingComment(comment: PendingComment): SetPendingComment {
   return { type: "set_pending_comment", comment };
@@ -26,6 +28,10 @@ export function setPendingComment(comment: PendingComment): SetPendingComment {
 
 export function setHoveredComment(comment: any): SetHoveredComment {
   return { type: "set_hovered_comment", comment };
+}
+
+export function setSelectedComment(comment: any): SetSelectedComment {
+  return { type: "set_selected_comment", comment };
 }
 
 export function clearPendingComment(): SetPendingComment {
@@ -74,72 +80,6 @@ export function showFloatingItem(): UIThunkAction {
 export function hideFloatingItem(): UIThunkAction {
   return async ({ dispatch }) => {
     dispatch(setFloatingItem(null));
-  };
-}
-
-export function replyToItem(item: Event | Comment | FloatingItem): UIThunkAction {
-  return async ({ dispatch, getState }) => {
-    const { point, time } = item;
-    const state = getState();
-    const canvas = selectors.getCanvas(state);
-    const recordingTarget = selectors.getRecordingTarget(state);
-
-    dispatch(seekToComment(item));
-
-    if ("comment" in item && item.comment && "id" in item.comment) {
-      // Add a reply to an event's comment.
-      const pendingComment: PendingComment = {
-        type: "new_reply",
-        comment: {
-          content: "",
-          time,
-          point,
-          hasFrames: false,
-          sourceLocation: null,
-          parentId: item.comment.id,
-        },
-      };
-
-      dispatch(setPendingComment(pendingComment));
-    } else if ("id" in item) {
-      // Add a reply to a non-event's comment.
-      const pendingComment: PendingComment = {
-        type: "new_reply",
-        comment: {
-          content: "",
-          time,
-          point,
-          hasFrames: "hasFrames" in item && item.hasFrames,
-          sourceLocation: null,
-          parentId: item.id,
-        },
-      };
-
-      dispatch(setPendingComment(pendingComment));
-    } else {
-      const position =
-        recordingTarget == "node"
-          ? null
-          : {
-              x: canvas!.width * 0.5,
-              y: canvas!.height * 0.5,
-            };
-
-      // Add a new comment to an event or a temporary pause item.
-      const pendingComment: PendingComment = {
-        type: "new_comment",
-        comment: {
-          content: "",
-          time,
-          point,
-          hasFrames: "hasFrames" in item && item.hasFrames,
-          sourceLocation: (await ThreadFront.getCurrentPauseSourceLocation()) || null,
-          position,
-        },
-      };
-
-      dispatch(setPendingComment(pendingComment));
-    }
   };
 }
 

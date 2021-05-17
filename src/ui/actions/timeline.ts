@@ -24,6 +24,7 @@ import { waitForTime } from "protocol/utils";
 const { features } = require("ui/utils/prefs");
 import KeyShortcuts from "ui/utils/key-shortcuts";
 import { getFirstComment } from "ui/hooks/comments/comments";
+import { setSelectedComment } from "./comments";
 
 export type SetTimelineStateAction = Action<"set_timeline_state"> & {
   state: Partial<TimelineState>;
@@ -247,8 +248,9 @@ export function seek(
   hasFrames: boolean,
   pauseId?: PauseId
 ): UIThunkAction {
-  return () => {
+  return ({ dispatch }) => {
     const pause = pauseId !== undefined ? Pause.getById(pauseId) : undefined;
+    dispatch(setSelectedComment(null));
 
     updateUrl({ point, time, hasFrames });
     if (pause) {
