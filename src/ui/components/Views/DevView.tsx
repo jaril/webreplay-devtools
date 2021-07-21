@@ -13,6 +13,7 @@ import { updateTimelineDimensions } from "../../actions/timeline";
 import { prefs } from "../../utils/prefs";
 import { selectors } from "../../reducers";
 import { UIState } from "ui/state";
+import SidePanel from "../SidePanel";
 
 function DevView({
   updateTimelineDimensions,
@@ -62,6 +63,9 @@ function DevView({
         <Toolbar />
         <div style={{ flexDirection: "column", display: "flex", height: "100%", width: "100%" }}>
           <div className="vertical-panels">
+            <div style={{ borderRight: "1px solid var(--theme-splitter-color)" }}>
+              <SidePanel />
+            </div>
             <SplitBox
               style={{ width: "100%", overflow: "hidden" }}
               splitterSize={1}
@@ -87,18 +91,23 @@ function DevView({
     <div className="horizontal-panels">
       <Toolbar />
       <div className="vertical-panels">
-        <SplitBox
-          style={{ width: "100%", overflow: "hidden" }}
-          splitterSize={1}
-          initialSize={prefs.toolboxHeight as string}
-          minSize="20%"
-          maxSize="80%"
-          vert={true}
-          onMove={handleMove}
-          startPanel={<Toolbox />}
-          endPanel={showVideoPanel ? <Viewer /> : <SecondaryToolbox />}
-          endPanelControl={false}
-        />
+        <div className="horizontal-panels">
+          <div style={{ borderRight: "1px solid var(--theme-splitter-color)" }}>
+            <SidePanel />
+          </div>
+          <SplitBox
+            style={{ width: "100%", overflow: "hidden" }}
+            splitterSize={1}
+            initialSize={prefs.toolboxHeight as string}
+            minSize="20%"
+            maxSize="80%"
+            vert={true}
+            onMove={handleMove}
+            startPanel={<Toolbox />}
+            endPanel={showVideoPanel ? <Viewer /> : <SecondaryToolbox />}
+            endPanelControl={false}
+          />
+        </div>
         <div id="timeline-container">
           <Timeline />
         </div>

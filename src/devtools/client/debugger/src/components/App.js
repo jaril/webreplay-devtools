@@ -203,25 +203,27 @@ class Debugger extends Component {
   renderLayout = () => {
     const { startPanelCollapsed } = this.props;
 
-    return (
-      <SplitBox
-        style={{ width: "100%" }}
-        initialSize={prefs.startPanelSize}
-        minSize={30}
-        maxSize="85%"
-        splitterSize={1}
-        onResizeEnd={num => {
-          prefs.startPanelSize = num;
-        }}
-        startPanelCollapsed={startPanelCollapsed}
-        startPanel={
-          <div className="panes" style={{ width: "100%" }}>
-            <SidePanel />
-          </div>
-        }
-        endPanel={this.renderEditorPane()}
-      />
-    );
+    return this.renderEditorPane();
+
+    // return (
+    //   <SplitBox
+    //     style={{ width: "100%" }}
+    //     initialSize={prefs.startPanelSize}
+    //     minSize={30}
+    //     maxSize="85%"
+    //     splitterSize={1}
+    //     onResizeEnd={num => {
+    //       prefs.startPanelSize = num;
+    //     }}
+    //     startPanelCollapsed={startPanelCollapsed}
+    //     startPanel={
+    //       <div className="panes" style={{ width: "100%" }}>
+    //         <SidePanel />
+    //       </div>
+    //     }
+    //     endPanel={this.renderEditorPane()}
+    //   />
+    // );
   };
 
   renderShortcutsModal() {
