@@ -20,7 +20,11 @@ function SidePanel({ selectedPrimaryPanel }: PropsFromRedux) {
     sidepanel = <Events />;
   }
 
-  return <div style={{ width: "400px" }}>{sidepanel}</div>;
+  return (
+    <div style={{ width: "400px", borderRight: "1px solid var(--theme-splitter-color)" }}>
+      {sidepanel}
+    </div>
+  );
 }
 
 const connector = connect((state: UIState) => ({

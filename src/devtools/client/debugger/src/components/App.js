@@ -204,6 +204,13 @@ class Debugger extends Component {
     const { startPanelCollapsed } = this.props;
 
     return (
+      <div className="horizontal-panels">
+        <SidePanel />
+        {this.renderEditorPane()}
+      </div>
+    );
+
+    return (
       <SplitBox
         style={{ width: "100%" }}
         initialSize={prefs.startPanelSize}
